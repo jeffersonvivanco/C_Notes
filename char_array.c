@@ -4,7 +4,7 @@
 int main(int argc, char const *argv[]) {
   char str_a[20];
 
-  strcpy(str_a, "Hello, world!\n");
+  strcpy(str_a, "Hello, Kali!");
   printf(str_a);
   return 0;
 }

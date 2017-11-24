@@ -7,7 +7,7 @@ the concepts of C. Please use a linux distro to run these short programs.
 Use the -g option when compiling to be able to debug it later using gdb.
 If you don't have gdb, install by running -> apt install gdb.
 
-##gdb notes
+## gdb notes
 Run it with -q to supress the welcome banner.
 
 Commands:
@@ -17,6 +17,8 @@ Commands:
 * run: runs the code, ex: run AAAA, runs the code with a command line argument of AAA
 * x/s: examines a variable or data structure, x is for examines and s is for string, 
 * print: prints, can do arithmetic as well
+* disass: disassembles a function ex -> disass main
+* cont: continues to run the program
 
 ### Memory Segmentation
 A compiled program's memory is divided into five segments
@@ -40,5 +42,35 @@ A compiled program's memory is divided into five segments
  * the heap segment is a segment of memory a programmer can directly control.
  * blocks of memory in this segment can be allocated and used for whatever the
    programmer might need.
- * not a fixed size, can grow larger or smaller
+ * not a fixed size, can grow larger or smaller as needed
+ * all of the memory within the heap is managed by allocator and deallocator
+   algorithms
+ * the growth of the heap moves downward toward higher memory addresses
 5. stack
+ * the stack segment also has variable size and is used as a temporary scratch
+   pad to store local function variables and context during function calls.
+ * this is what GDB's backtrace command looks at.
+ * when a program calls a function, that function will have its own set of
+   passed variables, and the function's code will be at a different memory
+   location in the text (or code) segment. Since the context and the EIP must
+   change when a function is called, the stack is used to remember all of the
+   passed variables, the location the EIP should return to after the function
+   is finished, and all the local variables used by that function.
+ * all of this information is stored together on the stack in what is
+   collectively called a stack frame. The stack contains many stack frames.
+ * in general compsci terms, a stack is an abstract data structure that is used
+   frequently. It has first-in, last-out (FILO) ordering.
+ * opposite to the dynamic growth of the heap, as the stack changes in size, it
+   grows upward in a visual listing of memory, toward lower memory addresses.
+ * the FILO nature of a stack might seem odd, but since the stack is used to
+   store context, it's very useful. When a function is called, several things 
+   are pushed to the stack together in a stack frame. The EBP register
+   sometimes called the frame pointer (FP) or local base (LB) pointer--is used
+   to reference local function variables in the current stack frame. Each stack
+   frame contains the parameters to the function, its local variables, and two
+   pointers that are necessary to put things back the way they were:
+   1. the saved frame pointer (SFP): is used to restore EBP to its previous 
+      value
+   2. the return address: is used to restore EIP to the next instruction found
+      after the function call. This restores the functional context of the
+      previous stack frame.

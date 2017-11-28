@@ -7,6 +7,13 @@ the concepts of C. Please use a linux distro to run these short programs.
 Use the -g option when compiling to be able to debug it later using gdb.
 If you don't have gdb, install by running -> apt install gdb.
 
+* The GNU development tools include a program called objdump, which can be used to
+examine compiled binaries. ex: objdump -D a.out | grep -A20 main.:. In the example,
+we use grep to only print out the first 20 lines after the general expression main:.
+* objdump displays the binaries in hexadecimal bytes and in assembly language. There are
+two types of assembly languages, AT&T and Intel, default is AT&T, but Intel is so much
+easier to read. To change it to Intel add -M intel to objdump.
+
 ## gdb notes
 Run it with -q to supress the welcome banner.
 

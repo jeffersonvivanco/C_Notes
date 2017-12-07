@@ -13,19 +13,73 @@ we use grep to only print out the first 20 lines after the general expression ma
 * objdump displays the binaries in hexadecimal bytes and in assembly language. There are
 two types of assembly languages, AT&T and Intel, default is AT&T, but Intel is so much
 easier to read. To change it to Intel add -M intel to objdump.
+* The GNU development tools also include a debugger called GDB. Debuggers are used by
+programmers to step through compiled programs, examine program memory, and view processor
+registers.
+
+## registers
+* The first four registers (EAX, ECX, EDX, and EBX) are known as general purpose registers.
+These are called accumulator, Counter, Data, and Base registers, respectively. They mainly
+act as temporary variables for the CPU when it is executing machine instructions.
+* The second four registers (ESP, EBP, ESI, and EDI) are also general purpose registers,
+but they are sometimes known as pointers and indexes. These stand for Stack Pointer, Base Pointer, 
+Source Index, and Destination Index, respectively. The first two registers are called pointers
+because they store 32-bit addresses, which essentially point to that location in memory. These
+registers are fairly important to program execution and memory management. The last two registers
+are also technically pointers, which are commonly used to point to the source and destination when
+data needs to be read from or written to. There are load and store instructions that use these
+registers, but for the most part, these registers can be thought of as just simple general purpose
+registers.
+* The EIP register is the Instruction Pointer register, which points to the current instruction the
+processor is reading.
+* The remaining EFLAGS register actually consists of several bit flags that are used for comparisons
+and memory segmentations. The actual memory is split into several different segments, and these
+registers keep track of that. For the most part, these registers can be ignored since they rarely
+need to be accessed directly.
 
 ## gdb notes
 Run it with -q to supress the welcome banner.
+
+### Understanding Assembly
+* The assembly instructions in Intel syntax generally follow this style
+	operation <destination>, <source>
+* The destination and source values will either be a register, a memory address, or a value.
+* The operations are usually intuitive mnemonics: The mov operation will move a value from the source
+to the destination, sub will subtract, inc will increment, and so forth.
+* There are also operations that are used to control the flow of execution. The cmp operation is used to
+compare values, and basically any operation beginning with j is used to jump to a different part of code.
+
+
+
 
 Commands:
 
 * list: shows you the code, use list again to see remaining code.
 * break: sets up a breakpoint, ex: break 9, sets a breakpoint at line 9
 * run: runs the code, ex: run AAAA, runs the code with a command line argument of AAA
-* x/s: examines a variable or data structure, x is for examines and s is for string, 
+* x/s: examines a certain address of memory, x is short for examine, s is for string, 
+	*  s is the display format. It is optionally preceded by a count of how many units to examine.
+	   Some common format letters are as follows.
+		1. o: Display in octal
+		2. x: Display in hexadecimal
+		3. u: Display in unsigned, standard base-10 decimal
+		4. t: Display in binary
+	* The default size of a single unit is a four-byte word unit called a word. The size of the display units
+	  for the examine command can be changed by adding a size letter to the end of the format letter. The valid size
+	  letters are as follows:
+		1. b: A single byte
+		2. h: A halfword, which is 2 bytes in size
+		3. w: A word, which is 4 bytes in size
+		4. g: A giant, which is 8 bytes in size.
+	* This is slightly confusing, because sometimes the term word also refers to 2-byte values. In this case
+	  a double word or DWORD refers to a 4-byte value
 * print: prints, can do arithmetic as well
 * disass: disassembles a function ex -> disass main
 * cont: continues to run the program
+* info registers: will info about the processor's registers
+* set dis intel: sets the disassembly syntax to intel (easier to read)
+* info register registerName : info about that register
+
 
 ### Memory Segmentation
 A compiled program's memory is divided into five segments

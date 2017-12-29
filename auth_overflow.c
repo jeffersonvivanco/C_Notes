@@ -3,8 +3,8 @@
 #include <string.h>
 
 int check_authentication(char *password){
-	int auth_flag = 0;
 	char password_buffer[16];
+	int auth_flag = 0;
 
 	strcpy(password_buffer, password);
 

@@ -38,7 +38,10 @@ registers keep track of that. For the most part, these registers can be ignored 
 need to be accessed directly.
 
 ## gdb notes
-Run it with -q to supress the welcome banner.
+* Run it with -q to supress the welcome banner.
+* The x86 processor values are stored in little indian byte order, which means the least significant
+byte is stored first.
+* man ascii - to look up ascii values
 
 ### Understanding Assembly
 * The assembly instructions in Intel syntax generally follow this style
@@ -48,6 +51,7 @@ Run it with -q to supress the welcome banner.
 to the destination, sub will subtract, inc will increment, and so forth.
 * There are also operations that are used to control the flow of execution. The cmp operation is used to
 compare values, and basically any operation beginning with j is used to jump to a different part of code.
+* The lea instruction is an acronym for Load Effective Address
 
 
 
@@ -64,6 +68,10 @@ Commands:
 		2. x: Display in hexadecimal
 		3. u: Display in unsigned, standard base-10 decimal
 		4. t: Display in binary
+		5. s: Display an entire string of character data
+		6. i: Display the memory as disassembled assembly language instructions
+		7. c: Can be used to look up a byte in the ascii table
+		8. d: Display as decimal.
 	* The default size of a single unit is a four-byte word unit called a word. The size of the display units
 	  for the examine command can be changed by adding a size letter to the end of the format letter. The valid size
 	  letters are as follows:
@@ -79,6 +87,7 @@ Commands:
 * info registers: will info about the processor's registers
 * set dis intel: sets the disassembly syntax to intel (easier to read)
 * info register registerName : info about that register
+* nexti: execute current instruction, 
 
 
 ### Memory Segmentation
@@ -135,3 +144,38 @@ A compiled program's memory is divided into five segments
    2. the return address: is used to restore EIP to the next instruction found
       after the function call. This restores the functional context of the
       previous stack frame.
+
+### Generalized Exploit Techniques
+* Buffer Overflows
+ 1. While C's simplicity increases the programmer's control and efficiency of the 
+    resulting programs, it can also result in programs that are vulnerable to buffer
+    overflows and memory leaks if the programmer isn't careful. This means that once
+    a variable is allocated memory, there are no built-in safe guards to ensure that 
+    the contents of a variable fit into the allocated memory space. If a programmer wants
+    to put ten bytes of data into a buffer that had only been allocated eight bytes of
+    space, that type of action is allowed, even though it will most likely cause the
+    program to crash. This is known as a buffer overrun or buffer overflow, since the
+    extra two bytes of data will overflow and spill out of the allocated memory, overwriting
+    whatever happens to come next.
+
+### Experimenting with BASH
+The BASH shell and Perl are common on most machines and are all that is needed to experiment
+with exploitation.
+
+* Perl: is an interpreted programming language with a print command that happens to be particularly
+suited to generating long sequences of characters. Perl can be used to execute instructions on the
+command line by using the -e switch like this.
+ * ex:jeff$ perl -e 'print "A" x 20;'
+ * This command prints A 20 times
+ * Any character, such as a nonprintable character, can also be printed by using, \x##, where ##
+   is the hexadecimal value of the character.
+ * In addition, string concatenation can be done in Perl with a period. This can be useful when
+   stringing multiple addresses together.
+* An entire shell command can be executed like a function, returning its output in place. This is done
+  by surrounding the command with parentheses and prefixing a dollar sign.
+  * jeff$ $(perl -e 'print "uname";')
+* Command substitution and Perl can be used in combination to quickly generate overflow buffers on
+  the fly.
+* You can use this technique to easily test a program with buffers of precise lengths.
+* This technique can be applied to overwrite the return address in a program with an exact value.
+

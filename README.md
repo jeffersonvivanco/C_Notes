@@ -17,6 +17,117 @@ easier to read. To change it to Intel add -M intel to objdump.
 programmers to step through compiled programs, examine program memory, and view processor
 registers.
 
+## language specific
+* sizes
+ * signed & unsigned integers: 4 bytes
+ * short int: 2 bytes
+ * long int: 4 bytes
+ * long long int: 8 bytes
+ * float: 4 bytes
+ * char: 1 byte
+ * 
+* signed, unsigned, long, short
+ * default is signed which means they can be both negative and positive
+  * A 32 bit signed integer is still just 32 bits, which means it can only be in one of 2^32 possiblw
+    bit combinations. This allows 32 bit signed integers to range from -2,147,483,648 to 2,147,483,647.
+    Essentially one of the bits is a flag marking the value positive or negative.
+  * Positively signed values look the same as unsigned values, but negative numbers are stored differently
+    using a method called two's complement.
+  * Two's complement represents negative numbers in a form suited for binary adders--when a negative value
+    in two's complement is added to a positive number of the same magnitude, the result will be 0. This is
+    done by first writing the positive number in binary, then inverting all the bits, and finally adding 1.
+    It sounds strange but it works and allows negative numbers to be added in combination with positive numbers
+    using simple binary adders.
+ * unsigned: dont allow negative values
+  * Since it's all just memory in the end, all numerical values must be stored in binary, and unsigned
+    values make the most sense in binary.
+  * A 32-bit unsigned integer can contain values from 0 (all binary 0s) to 4,294,967,295 (all binary 1s)
+* pointers
+ * pointers in C can be defined and used like any other variable type. 
+ * size depends
+  * on a x86 architecture where memory uses 32-bit addressing, pointers are also 32 bit in size. (4 bytes).
+  * my machine, the memory uses 64-bit addressing, so when I call sizeof on a pointer it says 8 bytes.
+
+ * Pointers are defined by prepending an asterisk ( * ) to the variable name. Instead of defining a variable of
+   that type, a pointer is defined as something that points to data of that type (a memory address is stored that
+   points to data of that type).
+ * In order to see the actual data stored in the pointer variable, you must use the address-of-operator. The
+   address-of-operator is an unary operator, which simply means it operates on a single argument. This operator is
+   just an ampersand (&) prepended to a variable name. When it's used, the address of that variable is returned, instead
+   of the variable itself. This operator exists both in GDB and in the C programming language. 
+ * An additional unary operator called the dereference operator exist for use with pointers. This operator will return
+   the data found in the address the pointer is pointing to, instead of the address itself. It takes the form of an
+   asterisk in front of the variable name, similar to the declaration of a pointer. This operator exists both in GDB
+   and in C.
+* format strings
+ * printf() uses format parameters to format the strings
+ * Each format parameter begins with a percent sign and uses a single-character short hand very similar to formatting
+   characters used by GDB's examine command.
+ * Parameters that receive their data as values
+  * %d : decimal
+  * %u : Unsigned decimal
+  * %x : hexadecimal 
+ * Parameters that expect pointers
+  * %s : string
+  * %n : number of bytes written so far
+  * %p : outputs memory address (meant for pointers) equivalent to 0x%08x
+* input
+ * scanf() works like printf() but it instead is used for input
+ * scanf expects all arguments to be pointers
+* typecasting
+ * is simply a way to temporarily change a variable's data type, despit how it was originally defined
+ * ex: (float)a
+* convert
+ * atoi() : converts character to integer
+* variable scoping
+ * Each function has it's own set of variables, which are independent of everything else. In fact, multiple calls to the same
+   function all have their own contexts.
+ * variables can also have a global scope, which means they will persist across all functions. Variables are global
+   if they are defined at the beginning of the code, outside of any functions.
+ * variables can also be defined as static variables by prepending the keyword static to the variable definition. Similar to
+   global variables, a static variable remains intact between function calls; however, static variables are also akin to local
+   variables since they remain local within a particular function context. One different and unique feature of static variables
+   is that they are only initialized once.
+* file access
+ * 2 primary ways to access files in C: file descriptors and file streams, ex: look at simplenote.c
+ * file descriptors are more low level
+  * a file descriptor is a number that is used to reference open files
+ * 4 common functions that use file descriptors are open(), close(), read(), and write(). All of these functions will return
+   -1 is there is an error. 
+ * The open() function opens a file for reading and/or writing and returns a file descriptor. The returned file descriptor
+   is just an integer value, but it is unique among open files. The file descriptor is passed as an argument to the other
+   functions like a pointer to the opened file. 
+ * For the close() function, the file descriptor is the only argument. 
+ * The read and write functions' arguments are the file descriptor, a pointer to the data to read or write, and the number
+   of bytes to read or write from that location.
+ * The arguments to the open() are a pointer to the filename to open and a series of predefined flags that specify the
+   access mode.
+ * The first set of flags is found in fcntl.h and is used to set the access mode. The access mode must use at least one of the
+   following three flags:
+  1. O_RDONLY - open file for read only access
+  2. O_WRONLY - open file for write only access
+  3. O_RDWR - open file for both write and read access.
+ * These flags can be combined with several other optional flags using the bitwise OR operator. A few of the more common and
+   useful of these flags are as follows:
+  1. O_APPEND - write data at the end of the file
+  2. O_TRUNC - if the file already exists, truncate the file to 0 length
+  3. O_CREAT - create the file if it doesn't exist
+ * If the O_CREAT flag is used in access mode for the open() function, an additional argument is needed to define the file permissions
+   of the newly created file. This argument uses bit flags defined in sys/stat.h, which can be combined with each other using bitwise
+   OR logic.
+  1. S_IRUSR - give the file read permission for the user (owner)
+  2. S_IWUSR - give the file write permission for the user (owner)
+  3. S_IXUSR - give the file execute permission for the user (owner)
+  4. S_IRGRP - give the file read permission for the group
+  5. S_IWGRP - give the file write permission for the group
+  6. S_IXGRP - give the file execute permission for the group
+  7. S_IROTH - give the file read permission for anyone
+  8. S_IWOTH - give the file write permission for anyone
+  9. S_IXOTH - give the file execute permission for anyone
+* common errors
+ * segmentation fault: when a program attempts to access an address that is out of bound so it crashes and dies
+
+
 ## registers
 * The first four registers (EAX, ECX, EDX, and EBX) are known as general purpose registers.
 These are called accumulator, Counter, Data, and Base registers, respectively. They mainly
@@ -94,12 +205,11 @@ Commands:
 A compiled program's memory is divided into five segments
 1. text
  * also called the code segment
- * this is where the assembled machine language instructions of the program are
-   located. The execution of instructions in this segment is nonlinear, thanks to    the aforementioned high-level control structures and functions, which compile
-   into branch, jump, and call instructions in assembly language. As a program
-   executes, the EIP is set to the first instruction in the text segment. The
-   processor then follows an execution loop that does the following:
-   
+ * this is where the assembled machine language instructions of the program are  located. The execution 
+   of instructions in this segment is nonlinear, thanks to the aforementioned high-level control structures
+   and functions, which compile into branch, jump, and call instructions in assembly language. As a program
+   executes, the EIP is set to the first instruction in the text segment. The  processor then follows an execution 
+   loop that does the following:
    1. Reads the instruction that EIP is pointing to
    2. Adds the byte length of the instruction to EIP
    3. Executes the instruction that was read in step 1
@@ -178,4 +288,10 @@ command line by using the -e switch like this.
   the fly.
 * You can use this technique to easily test a program with buffers of precise lengths.
 * This technique can be applied to overwrite the return address in a program with an exact value.
+* shellcode: instructions that tell the program to restore privilages and open a shell prompt.
 
+### Using the Environment
+* Sometimes a buffer is too small to hold even shellcode.
+* Environment variables are used by the user shell for a variety of things, but what they are used for isn't
+as important as the fact they are located on the stack and can be set from the shell.
+  * ex: setting an env variable called MYVAR to the string test -> export MYVAR=test

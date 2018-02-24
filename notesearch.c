@@ -1,10 +1,19 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <fcnt1.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include "hacking.h"
 
-#define FILENAME "/var/notes/"
+#define FILENAME "/var/notes"
+
+/*
+ *This program will read the note data and only display the notes
+  written by the user id.
+ *Additionally, an optional command-line argument can be supplied
+  for a search string. When this is used, only notes matching the
+  search string will be displayed.
+ * */
 
 int print_notes(int, int, char *); // note printing function
 int find_user_note(int, int); // seek in file for a note for user
@@ -16,7 +25,7 @@ int main(int argc, char *argv[]){
 	char searchstring[100];
 
 	if(argc > 1) // if there is an arg
-		strcpy(searchstring, argc[1]); // that is the search string
+		strcpy(searchstring, argv[1]); // that is the search string
 	else
 		searchstring[0] = 0; // search string is empty
 
@@ -26,7 +35,7 @@ int main(int argc, char *argv[]){
 		fatal("in main() while opening file for reading");
 	while(printing)
 		printing = print_notes(fd, userid, searchstring);
-	printf("---------------[end of note data]----------------");
+	printf("---------------[end of note data]----------------\n");
 	close(fd);
 }
 

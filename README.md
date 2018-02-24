@@ -126,7 +126,20 @@ registers.
   9. S_IXOTH - give the file execute permission for anyone
 * common errors
  * segmentation fault: when a program attempts to access an address that is out of bound so it crashes and dies
-
+* user ids
+ * Every user on a Unix system has a unique user ID number. This user ID can be displayed using the id command.
+ * The root user with user ID 0 is like the admin, which has full access to the system.
+ * The su command can be used to switch to a different user, and if this command is run as root, it can be done
+   without a password.
+ * The sudo command allows a single command to be run as the root user.
+ * The command chsh allows any user to change his or her own login shell.
+ * Ex: The program needs to be able to make changes to the /etc/passwd file, but only on the line that pertains to the current
+   user's account. The solution to this problem in unix is the setuid permission. This is an additional file permission bit that
+   can be set using chmod. When a program with this flag is executed, it runs as the user id of the file's owner.
+ * This means that a running program has both a real user ID and an effective user ID. These IDs can be retrieved using the
+   functions getuid() and geteuid().
+ * The chown command can be used to change the owner and group of a file
+ * The chmod u+s command turns on the setuid permission.
 
 ## registers
 * The first four registers (EAX, ECX, EDX, and EBX) are known as general purpose registers.

@@ -263,10 +263,15 @@ A compiled program's memory is divided into five segments
    frame contains the parameters to the function, its local variables, and two
    pointers that are necessary to put things back the way they were:
    1. the saved frame pointer (SFP): is used to restore EBP to its previous 
-      value
+      value. If the program is compiled with the flag -fomit-frame-pointer for
+      optimization, the frame pointer won't be used in the stack of the frame.
    2. the return address: is used to restore EIP to the next instruction found
       after the function call. This restores the functional context of the
-      previous stack frame.
+      previous stack frame. If you disassemble main, the next instruction's
+      address after the function call is the return address. When the function
+      finishes, the leave and ret instructions remove the stack frame and set the
+      execution pointer register (EIP) to the saved return address in the stack
+      frame.
 
 ### Generalized Exploit Techniques
 * Buffer Overflows
@@ -296,7 +301,9 @@ command line by using the -e switch like this.
    stringing multiple addresses together.
 * An entire shell command can be executed like a function, returning its output in place. This is done
   by surrounding the command with parentheses and prefixing a dollar sign.
-  * jeff$ $(perl -e 'print "uname";')
+  * jeff$ u$(perl -e 'print "na";')me
+  * This exact command-substitution effect can be accomplished with grave accent marks.(`)
+  * jeff$ u`perl -e 'print "na";`me
 * Command substitution and Perl can be used in combination to quickly generate overflow buffers on
   the fly.
 * You can use this technique to easily test a program with buffers of precise lengths.

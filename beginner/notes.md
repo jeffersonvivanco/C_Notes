@@ -61,7 +61,7 @@ Among others `printf` also recognizes `%o` for octal, `%x` for hexadecimal, `%c`
 * The qualifier `const` can be applied to the declaration of any variable to specify that its value will not be changed. For an array, the `const` qualifier says that the elements will not be altered. The `const` declaration can also be used with array arguments, to indicate that the function does not change the array.
 
 ## Increment and Decrement Operators
-* The unusual aspect is that `++` and `--` may be used as either prefix operators or postfix. In both cases, the effect is to increment the variable. But the expression `++n` increments n before its value is used, while `n++` increments n after its value has been used. 
+* The unusual aspect is that `++` and `--` may be used as either prefix operators or postfix. In both cases, the effect is to increment the variable. But the expression `++n` increments n **before its value is used**, while `n++` increments n **after its value has been used**.
 
 ## Bitwise Operators
 * C provides six operators for bit manipulation; these may only applied integral operands, that is, `char`, `short`, `int`, and `long` whether signed or unsigned.
@@ -288,7 +288,29 @@ equivalent. Recursion is especially convenient for recursively defined data stru
   * The `#ifdef` and `ifndef` lines are specialized forms that test whether a name is defined.
 
 ## Pointers and Arrays
-* A pointer is a variable that contains the address of a variable.
+* Using `malloc`
+  * initializes pointers using free memory. This allows dynamic allocation of memory.
+  * it is useful in setting up structures such as linked lists or data trees where you don't know exactly how much memory
+  will be needed at compile time, so you have to get memory during the programs execution.
+  * `malloc()`, residing in the `stdlib.h`, is used to initialize pointers with memory from free store (a section of 
+  memory available to all programs).
+  * the argument to `malloc` is the amount of memory requested (in bytes), and `malloc` gets a block of memory of the size
+  and then returns a pointer to the block of memory allocated.
+  * since different variable types have different memory requirements, we need to get a size for the amount of memory malloc should return. This can be done using the keyword `sizeof`, which takes an expression and returns its size.
+  ```c
+  #include <stdlib.h>
+  // This code set `ptr` to point to a memory address of size `int`.
+  int *ptr = malloc(sizeof(int));
+  /*
+  A sligtly cleaner version, gets the size of the type of ptr
+  malloc(sizeof(*ptr)); 
+  */
+  ```
+  * The memory that is pointed to becomes unavailable to other programs. **This means that the careful coder should free
+  this memory at the end of its usage lest the memory be lost to the operating system for the duration of the program (this
+  is often called memory leak because the program is not keeping track of all of its memory).**
+  * The free function returns memory to the operating system. `free(ptr);`
+* A pointer is a variable that contains the address of a variable. It "points" to locations in memory.
 * Pointers are much used in C, partly because they are sometimes the only way to express a computation, and partly because they usually lead to more compact
 and efficient code than can be obtained other ways.
 

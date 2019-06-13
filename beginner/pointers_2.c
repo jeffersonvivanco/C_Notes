@@ -1,10 +1,11 @@
 #include <stdio.h>
 
-void test_pointer();
-void test_pointer_2();
+void test_pointer(void);
+void test_pointer_2(void);
+void test_pointer_3(void);
 
 int main(){
-	test_pointer_2();
+	test_pointer_3();
 }
 
 void test_pointer(){
@@ -34,3 +35,14 @@ void test_pointer_2(){
 		
 	printf("\ns_1_array after copy is {%s}", s_1_array);
 }
+
+void test_pointer_3(){
+	char s_1_array[] = "hello world";
+	char *s_1 = &s_1_array[0];
+
+	while(*s_1) {
+		printf("\n[Debug] char: {%c}", *s_1);
+		s_1++;
+	}
+}
+

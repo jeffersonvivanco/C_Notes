@@ -1,5 +1,25 @@
 # C Notes
 
+## Compilers
+* A compiler is necessary to make your source code (.c, .cpp, .cc files) into a running program.
+* `gcc`
+  * Released by the Free Software Foundation, gcc is a nix-based C compiler usually operated via the command-line.
+  * To specify a name for the executable file `gcc filename -o outputFilename`
+  * To run `./outputFilename`. (The `./` is there to ensure you run the program for the current working directory)
+* Catching problems early
+  * To compile with all warnings enabled and to produce AINSI C compatible code (*recommended*) use the flags `-Wall -ainsi`
+  * If you want to have the compiler treat warnings as errors--meaning you don't even get an executable, you can use the `-Werror` flag.
+  This will make sure you don't miss an error.
+* GDB ready code
+  * If you want to prepare your executable for use by GDB, include the flag `-g`.
+  * This will enable GDB to give you detailed debugging information by including extra code in the executable file to allow GDB to find
+  variable names and list the source code.
+* Math library
+  * If you need to use functions from the math library (such as sin or sqrt from math.h), then you need to explicitly ask it to link with that
+  library with the `-l` flag and the library `m`. `gcc filename -o outputfileName -lm`
+  * Don't need it for C++
+* Use `man gcc` to find out more.
+
 ## printf()
 * `%d` - print as decimal integer
 * `%6d` - print as decimal integer, at least 6 characters wide
@@ -430,3 +450,102 @@ static char *name[] = {
     element of b need not point to a twenty-element vector; some may point to two elements, some to fifty, and some to none at
     all.
   * The most frequent use of arrays of pointers is to store character strings of diverse lengths.
+
+* Command-line Arguments
+  * A commmon convention for C programs on UNIX systems is that an argument that begins with a minus sign introduces an
+  optional flag or parameter. For example, in our `find_pattern_in_line.c` program. If we choose `-x` (for "except") to
+  signal the inversion, and `-n` ("number") to request line numbering, then the command `find -x -n pattern` will print
+  each line that doesn't match the pattern, preceded by its line number. 
+  * Optional arguments should be permitted in any order, and the rest of the program should be independent of the number of
+  arguments that were present.
+  * Furthermore, it is convenient for users if option arguments can be combined, as in `find -nx pattern`
+  * ===> Look at command_line_args.c, find_patter_in_line.c
+
+* Pointer to functions
+  * In C, a function itself is not a variable, but it is possible to define pointers to functions, which can be assigned, placed in arrays, passed
+  to functions, returned by functions, and so on.
+  * ====> Look at pointers_to_functions.c
+
+## Structures
+* A structure is a collection of one or more variables, possibly of different types, grouped together under a single name
+for convenient handling. (Structures are called "records" in some languages, notably Pascal.) Structures help to organize
+complicated data, particularly in large programs, because they permit a group of related variabls to be treated as a unit
+instead of as seprarate entities.
+* Basics
+  * ====> Look at structures_basics.c
+* Structures and Functions
+  * The only legal operations on a structure are copying it or assigning to it as a unit, taking its address with `&`, and accessing its members. Copy and
+  assignment include passing arguments to functions and returning values from functions as well.
+  * Structures may not be compared.
+  * A structure may be initialized by a list of constant member values; an automatic structure may also be initialized by an assignment.
+  * **structure parameters are passed by value like any others**
+  * **If a large structure is to be passed to a function, it is generally more efficient to pass a pointer than to copy the whole structure.**
+  * If `pp` points to a `point structure`, `*pp` is the structure, and `(*pp).x` and `(*pp).y` are the members.
+  * Pointers to structures are so frequently used that an alternative notation is provided as a shorthand. If `p` is a pointer to a structure, then
+  `p->member-of-structure` refers to the particular member.
+  * The structure operators `.` and `->`, together with `()` for function calls and `[]` for subscripts, are at the top of the precedence hierarchy
+  and thus bind very tightly. For example, given the declaration:
+  ```c
+  struct {
+    int len;
+    char *str;
+  } *p;
+  ``` 
+  then `++p->len` increments len, not p, because the implied parenthesization is `++(p->len)`. Parenthesis can be used to alter the binding: 
+  `(++p)->len` increments p before accessing len.
+  * In the same way, `*p->str` fetches whatever str points to; `*p->str++` increments str after accessing whatever it points to (just like 
+  `*s++`); `(*p->str)++` increments whatever str points to; and `*p++->str` increments p after accessing whatever str points to.
+  * ====> Look at structures_basics.c
+* Array of structures
+  * The structure declaration
+  ```c
+  struct key {
+    char *word;
+    int count;
+  } keytab[NKEYS];
+  ```
+  declares a structure type `key`, defines an array `keytab` of structures of this type, and sets aside storage for them. Each element of the
+  array is a structure. This could also be written
+  ```c
+  struct key {
+    char *word;
+    int count;
+  };
+  struct key keytab[NKEYS];
+  ```
+  * The structure initialization is analogous to earlier ones--the definition is followed by a list of initializers enclosed in braces:
+  ```c
+  struct key {
+    char *word;
+    int count;
+  } keytab[] = {
+    "auto", 0,
+    "break", 0
+    /* ... */
+  };
+  ```
+  The initializers are listed in pairs corresponding to the structure members. It would be more precise to enclose initializers for each "row"
+  or structure in braces, as in `{"auto", 0}, ...` but the inner braces are not necessary when the initializers are simple variables or character
+  strings, and when all are present.
+  * The size of the array is the size of one entry times the number of entries, so the number of entries is just *size of keytab / size of struct
+  key*.
+    * C provides a compile-time unary operator called `sizeof` that can be used to compute the size of any object. The expressions
+      * `sizeof` *object*
+      * `sizeof(`*type name*`)`
+    yield an integer equal to the size of the specified object or type in bytes. (Strictly, `sizeof` produces an unsigned integer value whose type,
+    `size_t`, is defined in the header `<stddef.h>`.) An object can be a variable or array or structure. A type name can be the name of a basic type
+    like `int` or `double`, or a derived type like a structure or pointer.
+    * A `sizeof` can not be used in a `#if` line, because the preprocessor does not parse type names. But the expression in the `#define` is not 
+    evaluated by the preprocessor, so the code here is legal.
+* Pointers to Structures
+  * The addition of two pointers is illegal. Subtraction is legal, however, so `high - low` is the number of elements.
+  * Don't assume, however, that the size of the structure is the sum of the sizes of its members. Because of alignment requirements for different
+  objects, there may be unnamed "holes" in a structure. Thus, for instance, if a char is 1 byte and an int is 4 bytes, the structure
+  ```c
+  struct {
+    char c;
+    int i;
+  };
+  ```
+  might well require 8 bytes, not five. The `sizeof` operator returns the proper value.
+* Self-referential Structures  

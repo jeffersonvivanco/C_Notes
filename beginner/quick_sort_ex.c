@@ -10,6 +10,7 @@ int main(){
 	for (i = 0; i < 4; i++){
 		printf("%d", numbers[i]);
 	}
+	printf("\n");
 }
 
 // quick_sort: sort v[left]...v[right] into increasing order

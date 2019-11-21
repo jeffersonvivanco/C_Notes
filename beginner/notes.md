@@ -469,7 +469,7 @@ static char *name[] = {
 ## Structures
 * A structure is a collection of one or more variables, possibly of different types, grouped together under a single name
 for convenient handling. (Structures are called "records" in some languages, notably Pascal.) Structures help to organize
-complicated data, particularly in large programs, because they permit a group of related variabls to be treated as a unit
+complicated data, particularly in large programs, because they permit a group of related variables to be treated as a unit
 instead of as seprarate entities.
 * Basics
   * ====> Look at structures_basics.c
@@ -548,4 +548,62 @@ instead of as seprarate entities.
   };
   ```
   might well require 8 bytes, not five. The `sizeof` operator returns the proper value.
-* Self-referential Structures  
+* Self-referential Structures
+  * Suppose we want to handle the more general problem of counting
+  the occurrences of all the words in some input. Since the list of
+  words isn't known in advance, we can't conveniently sort it and
+  use a binary search. Yet we can't do a linear search for each word
+  as it arrives, to see if it's already been seen; the program would
+  take too long. (More precisely, its running time is likely to
+  grow quadratically with the number of input words.) How can we
+  organize the data cope efficiently with a list of arbitrary words?
+  * We will use a data structure called a *binary tree*.
+  * The tree containe one "node" per distinct word; each node
+  contains 
+    * a pointer to the text of the word
+    * a count of the number of occurrences
+    * a pointer to the left child node
+    * a pointer to the right child node
+  * No node may have more than two children; it might have only
+  zero or one.
+  * The nodes are maintained so that at any node the left subtree
+  contains only words that are lexicographically less than the word
+  at the node, and the right subtree contains only words that are
+  greater.
+  * To find out whether a new word is already in the tree, start
+  at the root and compare the new word to the word stored at that
+  node. If they match, the question is answered affirmatively. If
+  the new word is less than the tree word, continue searching at
+  the left child, otherwise at the right child. If there is no child
+  in the required direction, the new word is not in the tree, and
+  in fact the empty slot is the proper place to add the new word.
+  This process is recursive, since the search from any node uses
+  a search from one of its children.
+  * Going back to the description of the node, it is conveniently
+  represented as a structure with 4 components.
+  ```c
+  struct tnode { // the tree node
+    char *word; // points to the text
+    int count; // number of occurrences
+    struct tnode *left; // left child
+    struct tnode *right; // right child
+  }
+  ```
+  * Occasionally, one needs a variation of self-referential
+  structures: two structures that refer to each other The way to
+  handle this is:
+  ```c 
+  struct t {
+    //...
+    struct s *p; // p points to an s
+  }
+
+  struct s {
+    struct t *q; // q points to a t
+  }
+  ```
+  * A practical note: if the tree becomes "unbalanced" because the
+  words don't arrive in random order, the running time of the
+  program can grow too much. As a worst case, if the words are
+  already in order, this program does an expensive simulation of
+  linear search.

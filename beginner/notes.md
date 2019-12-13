@@ -64,7 +64,7 @@ Among others `printf` also recognizes `%o` for octal, `%x` for hexadecimal, `%c`
   * The intent is that `short` and `long` should provide different lengths of integers where practical: `int` will normally be the natural size for a particular machine. `short` is often *16 bits*, `long` *32 bits*, and `int` either * 16 or 32 bits*.
 * The qualifier `signed` and `unsigned`may be applied to `char` or any integer.
   * `unsigned` numbers are always positive or zero, and obey the laws of arithmetic modulo 2^n, where n is the number of bits in the type. 
-  * So for instance, if chars are 8 bits, unsigned char variables have values between 0 and 255, while signed chars have values between -128 and 127 (in a two's complement machine). Whether plain chars are are signed or unsigned is machine-dependent, but pritable characters are always positive.
+  * So for instance, if chars are 8 bits, unsigned char variables have values between 0 and 255, while signed chars have values between -128 and 127 (in a two's complement machine). Whether plain chars are are signed or unsigned is machine-dependent, but printable characters are always positive.
 * The type `long double` specifies extended precision floating point. As with integers, the sizes of floating-point objects are implementation defined; float, double, and long double could represent one, two, or three distinct sizes.
 * The standard headers `<limits.h>` and `<float.h>` contain symbolic constants for all these sizes, along with other properties of the machine and compiler.
 
@@ -130,7 +130,7 @@ for example to process two indices in parallel. Look at string_reverse.c
 ## Goto and Labels
 * C provides the infinitely abusable `goto` statement, and labels to branch to. Formally, the `goto` is never necessary, and in practice it is almost always
 easy to write code without it.
-* Nevertheless, there a few situations where `gotos` may find a place. The most common is to abandon processing in some deeply nested structure, such as breaking out of two or more loops at once. The `break` statement cannot used directly since it only exits from the innermost loop.
+* Nevertheless, there a few situations where `gotos` may find a place. The most common is to abandon processing in some deeply nested structure, such as breaking out of two or more loops at once. The `break` statement cannot be used directly since it only exits from the innermost loop.
 
 ## Basics of functions
 * The mechanics of how to compile and load a C program that resides on multiple source files vary from one system to the next.
@@ -606,4 +606,27 @@ instead of as seprarate entities.
   words don't arrive in random order, the running time of the
   program can grow too much. As a worst case, if the words are
   already in order, this program does an expensive simulation of
-  linear search.
+  linear search. There are generalizations of the binary tree that
+  do not suffer from this worst-case behavior.
+  * Clearly it's desirable that there be only one storage allocator
+  in a program, even though it allocates different kinds of objects.
+  But if one allocator is to process requests for, say, pointers to
+  chars and pointers to struct tnodes, two questions arise. First,
+  how does it meet the requirement of most real machines that
+  objects of certain types must satisfy alignment restrictions (for
+  example, integers often must be located at even addresses)?
+  Second, what declarations can cope with the fact that an allocator
+  must necessarily return different kinds of pointers?
+  * Alignment requirements can generally be satisfied easily, at
+  the cost of some wasted space, by ensuring that the allocator
+  always returns a pointer that meets all alignement restrictions.
+  `malloc()` from `<stdlib.h>` guarantees the alignment 
+  requirements.
+  * The question of the type declaration for a function like
+  `malloc()` is a vexing one for any language that takes its type-
+  checking seriously. In C, the proper method is to declare that
+  `malloc()` returns a pointer to `void`, then explicitly coerce
+  the pointer into the desired type with a cast. `malloc` returns
+  `NULL` if no space is available. Storage obtained by calling
+  `malloc` may be freed for re-use by calling `free`.
+* Table Lookup

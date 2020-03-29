@@ -64,7 +64,7 @@ Among others `printf` also recognizes `%o` for octal, `%x` for hexadecimal, `%c`
   * The intent is that `short` and `long` should provide different lengths of integers where practical: `int` will normally be the natural size for a particular machine. `short` is often *16 bits*, `long` *32 bits*, and `int` either * 16 or 32 bits*.
 * The qualifier `signed` and `unsigned`may be applied to `char` or any integer.
   * `unsigned` numbers are always positive or zero, and obey the laws of arithmetic modulo 2^n, where n is the number of bits in the type. 
-  * So for instance, if chars are 8 bits, unsigned char variables have values between 0 and 255, while signed chars have values between -128 and 127 (in a two's complement machine). Whether plain chars are are signed or unsigned is machine-dependent, but pritable characters are always positive.
+  * So for instance, if chars are 8 bits, unsigned char variables have values between 0 and 255, while signed chars have values between -128 and 127 (in a two's complement machine). Whether plain chars are are signed or unsigned is machine-dependent, but printable characters are always positive.
 * The type `long double` specifies extended precision floating point. As with integers, the sizes of floating-point objects are implementation defined; float, double, and long double could represent one, two, or three distinct sizes.
 * The standard headers `<limits.h>` and `<float.h>` contain symbolic constants for all these sizes, along with other properties of the machine and compiler.
 
@@ -130,7 +130,7 @@ for example to process two indices in parallel. Look at string_reverse.c
 ## Goto and Labels
 * C provides the infinitely abusable `goto` statement, and labels to branch to. Formally, the `goto` is never necessary, and in practice it is almost always
 easy to write code without it.
-* Nevertheless, there a few situations where `gotos` may find a place. The most common is to abandon processing in some deeply nested structure, such as breaking out of two or more loops at once. The `break` statement cannot used directly since it only exits from the innermost loop.
+* Nevertheless, there a few situations where `gotos` may find a place. The most common is to abandon processing in some deeply nested structure, such as breaking out of two or more loops at once. The `break` statement cannot be used directly since it only exits from the innermost loop.
 
 ## Basics of functions
 * The mechanics of how to compile and load a C program that resides on multiple source files vary from one system to the next.
@@ -469,7 +469,7 @@ static char *name[] = {
 ## Structures
 * A structure is a collection of one or more variables, possibly of different types, grouped together under a single name
 for convenient handling. (Structures are called "records" in some languages, notably Pascal.) Structures help to organize
-complicated data, particularly in large programs, because they permit a group of related variabls to be treated as a unit
+complicated data, particularly in large programs, because they permit a group of related variables to be treated as a unit
 instead of as seprarate entities.
 * Basics
   * ====> Look at structures_basics.c
@@ -548,4 +548,85 @@ instead of as seprarate entities.
   };
   ```
   might well require 8 bytes, not five. The `sizeof` operator returns the proper value.
-* Self-referential Structures  
+* Self-referential Structures
+  * Suppose we want to handle the more general problem of counting
+  the occurrences of all the words in some input. Since the list of
+  words isn't known in advance, we can't conveniently sort it and
+  use a binary search. Yet we can't do a linear search for each word
+  as it arrives, to see if it's already been seen; the program would
+  take too long. (More precisely, its running time is likely to
+  grow quadratically with the number of input words.) How can we
+  organize the data cope efficiently with a list of arbitrary words?
+  * We will use a data structure called a *binary tree*.
+  * The tree containe one "node" per distinct word; each node
+  contains 
+    * a pointer to the text of the word
+    * a count of the number of occurrences
+    * a pointer to the left child node
+    * a pointer to the right child node
+  * No node may have more than two children; it might have only
+  zero or one.
+  * The nodes are maintained so that at any node the left subtree
+  contains only words that are lexicographically less than the word
+  at the node, and the right subtree contains only words that are
+  greater.
+  * To find out whether a new word is already in the tree, start
+  at the root and compare the new word to the word stored at that
+  node. If they match, the question is answered affirmatively. If
+  the new word is less than the tree word, continue searching at
+  the left child, otherwise at the right child. If there is no child
+  in the required direction, the new word is not in the tree, and
+  in fact the empty slot is the proper place to add the new word.
+  This process is recursive, since the search from any node uses
+  a search from one of its children.
+  * Going back to the description of the node, it is conveniently
+  represented as a structure with 4 components.
+  ```c
+  struct tnode { // the tree node
+    char *word; // points to the text
+    int count; // number of occurrences
+    struct tnode *left; // left child
+    struct tnode *right; // right child
+  }
+  ```
+  * Occasionally, one needs a variation of self-referential
+  structures: two structures that refer to each other The way to
+  handle this is:
+  ```c 
+  struct t {
+    //...
+    struct s *p; // p points to an s
+  }
+
+  struct s {
+    struct t *q; // q points to a t
+  }
+  ```
+  * A practical note: if the tree becomes "unbalanced" because the
+  words don't arrive in random order, the running time of the
+  program can grow too much. As a worst case, if the words are
+  already in order, this program does an expensive simulation of
+  linear search. There are generalizations of the binary tree that
+  do not suffer from this worst-case behavior.
+  * Clearly it's desirable that there be only one storage allocator
+  in a program, even though it allocates different kinds of objects.
+  But if one allocator is to process requests for, say, pointers to
+  chars and pointers to struct tnodes, two questions arise. First,
+  how does it meet the requirement of most real machines that
+  objects of certain types must satisfy alignment restrictions (for
+  example, integers often must be located at even addresses)?
+  Second, what declarations can cope with the fact that an allocator
+  must necessarily return different kinds of pointers?
+  * Alignment requirements can generally be satisfied easily, at
+  the cost of some wasted space, by ensuring that the allocator
+  always returns a pointer that meets all alignement restrictions.
+  `malloc()` from `<stdlib.h>` guarantees the alignment 
+  requirements.
+  * The question of the type declaration for a function like
+  `malloc()` is a vexing one for any language that takes its type-
+  checking seriously. In C, the proper method is to declare that
+  `malloc()` returns a pointer to `void`, then explicitly coerce
+  the pointer into the desired type with a cast. `malloc` returns
+  `NULL` if no space is available. Storage obtained by calling
+  `malloc` may be freed for re-use by calling `free`.
+* Table Lookup
